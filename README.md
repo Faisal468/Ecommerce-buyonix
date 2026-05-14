@@ -128,6 +128,7 @@ npm test
 
 - **Muhammad Faisal** - [Github](https://github.com/Faisal468)
 - **Kamran Abbasi** — [GitHub](https://github.com/kamranabbasi3404)
+- **Abdul hadi** - [Github](https://github.com/abdulHadi-71)
 
 ---
 
