@@ -128,8 +128,12 @@ npm test
 
 - **Muhammad Faisal** - [Github](https://github.com/Faisal468)
 - **Kamran Abbasi** — [GitHub](https://github.com/kamranabbasi3404)
+<<<<<<< HEAD
 - **Abdul hadi** - [Github](https://github.com/abdulHadi-71)
 
+=======
+- **Abdul Hadi** — [GitHub](https://github.com/abdulHadi-71)
+>>>>>>> 95d3448 (Add Abdul Hadi from authors list)
 ---
 
 ## 📄 License
