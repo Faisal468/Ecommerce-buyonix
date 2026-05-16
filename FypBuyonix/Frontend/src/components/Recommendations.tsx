@@ -19,6 +19,8 @@ interface Recommendation {
   };
 }
 
+const BACKEND_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
 const Recommendations: React.FC = () => {
   const navigate = useNavigate();
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
@@ -26,8 +28,6 @@ const Recommendations: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const cartContext = useContext(CartContext);
   const addToCart = cartContext?.addToCart;
-
-  const BACKEND_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
   useEffect(() => {
     const fetchRecommendations = async () => {

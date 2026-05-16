@@ -60,6 +60,10 @@ class VisualSearchHelper {
      * Start the Flask server as a background process
      */
     startServer() {
+        if (!this.serverUrl.includes('localhost') && !this.serverUrl.includes('127.0.0.1')) {
+            console.log('ℹ️  Using remote visual search server:', this.serverUrl);
+            return;
+        }
         try {
             const pythonCmd = this.findPython();
             const args = pythonCmd === 'py' ? ['-3.12', this.serverScript] : [this.serverScript];
@@ -95,21 +99,15 @@ class VisualSearchHelper {
      */
     async httpRequest(endpoint, method = 'POST', data = null) {
         const url = `${this.serverUrl}${endpoint}`;
-
-        const options = {
-            method,
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        };
+        const urlObj = new URL(url);
+        const isHttps = urlObj.protocol === 'https:';
+        const transport = isHttps ? require('https') : require('http');
+        const defaultPort = isHttps ? 443 : 80;
 
         return new Promise((resolve, reject) => {
-            const http = require('http');
-            const urlObj = new URL(url);
-
-            const req = http.request({
+            const req = transport.request({
                 hostname: urlObj.hostname,
-                port: urlObj.port,
+                port: urlObj.port || defaultPort,
                 path: urlObj.pathname,
                 method: method,
                 headers: { 'Content-Type': 'application/json' }
