@@ -1,4 +1,3 @@
-@"
 from fastapi import FastAPI, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 import pickle
@@ -38,4 +37,3 @@ async def visual_search(file: UploadFile = File(...)):
         return {"results": [], "message": "Visual search processing"}
     except Exception as e:
         return {"results": [], "error": str(e)}
-"@ | Out-File -FilePath main.py -Encoding utf8
