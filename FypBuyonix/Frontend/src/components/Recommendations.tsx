@@ -35,51 +35,33 @@ const Recommendations: React.FC = () => {
         setLoading(true);
         setError(null);
 
-        // Try all possible localStorage keys
+        const storedUser = localStorage.getItem('user');
         let userId = '';
-        const possibleKeys = ['user', 'userData', 'currentUser', 'authUser'];
 
-        for (const key of possibleKeys) {
-          const stored = localStorage.getItem(key);
-          if (stored) {
-            try {
-              const parsed = JSON.parse(stored);
-              // Support both _id and id formats
-              userId = parsed._id || parsed.id || '';
-              if (userId) break;
-            } catch {
-              // not JSON, skip
-            }
+        if (storedUser) {
+          try {
+            const user = JSON.parse(storedUser);
+            userId = user._id;
+          } catch (e) {
+            console.error("Error parsing user from localStorage", e);
           }
         }
 
-        // Also check if token exists separately
-        if (!userId) {
-          console.log('No user found in localStorage — not logged in');
-          setLoading(false);
-          return;
+        if (!userId || userId.length !== 24) {
+          userId = '65d8c12e9f1a2b3c4d5e6f78';
         }
-
-        // Validate MongoDB ObjectId length (24 chars)
-        if (userId.length !== 24) {
-          console.log('Invalid userId format:', userId);
-          setLoading(false);
-          return;
-        }
-
-        console.log('Fetching recommendations for user:', userId);
 
         const response = await fetch(`${BACKEND_URL}/product/recommendations/${userId}?num=5`);
 
         if (!response.ok) {
           const errorText = await response.text();
-          console.error('Server Error Response:', errorText);
+          console.error("Server Error Response:", errorText);
           throw new Error('Failed to fetch recommendations');
         }
 
         const data = await response.json();
 
-        if (data.success && data.recommendations && data.recommendations.length > 0) {
+        if (data.success && data.recommendations) {
           setRecommendations(data.recommendations);
         } else {
           setError('No recommendations available');
@@ -113,7 +95,6 @@ const Recommendations: React.FC = () => {
     );
   }
 
-  // Silently hide if no recommendations
   if (error || recommendations.length === 0) {
     return null;
   }
@@ -125,19 +106,16 @@ const Recommendations: React.FC = () => {
   const handleAddToCart = (e: React.MouseEvent, product: Recommendation) => {
     e.stopPropagation();
     if (addToCart) {
-      const imageUrl =
-        product.images && product.images.length > 0
-          ? typeof product.images[0] === 'string'
-            ? product.images[0]
-            : product.images[0]?.url
-          : undefined;
+      const imageUrl = product.images && product.images.length > 0
+        ? (typeof product.images[0] === 'string' ? product.images[0] : product.images[0]?.url)
+        : undefined;
 
       const cartItem: CartItem = {
         _id: product._id,
         name: product.name,
         price: product.price,
         quantity: 1,
-        images: imageUrl ? [imageUrl] : [],
+        images: imageUrl ? [imageUrl] : []
       };
       addToCart(cartItem);
     }
@@ -154,14 +132,10 @@ const Recommendations: React.FC = () => {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
         {recommendations.map((product) => {
-          const discountPercent =
-            product.discount && product.discount > 0 ? `-${product.discount}%` : null;
-          const imageUrl =
-            product.images && product.images.length > 0
-              ? typeof product.images[0] === 'string'
-                ? product.images[0]
-                : product.images[0]?.url
-              : 'https://via.placeholder.com/300';
+          const discountPercent = product.discount && product.discount > 0 ? `-${product.discount}%` : null;
+          const imageUrl = product.images && product.images.length > 0
+            ? (typeof product.images[0] === 'string' ? product.images[0] : product.images[0]?.url)
+            : 'https://via.placeholder.com/300';
 
           return (
             <div
@@ -196,9 +170,7 @@ const Recommendations: React.FC = () => {
                 </p>
                 <div className="flex items-center justify-between mb-3 mt-auto">
                   <div>
-                    <span className="text-lg font-bold text-gray-900">
-                      ${product.price?.toFixed(2)}
-                    </span>
+                    <span className="text-lg font-bold text-gray-900">${product.price?.toFixed(2)}</span>
                     {product.originalPrice && product.originalPrice > product.price && (
                       <span className="ml-2 text-sm text-gray-500 line-through">
                         ${product.originalPrice.toFixed(2)}
