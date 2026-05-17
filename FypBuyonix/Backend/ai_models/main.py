@@ -57,19 +57,40 @@ def get_recommendations(user_id: str, limit: int = 10):
         if cf_model is None:
             return {"recommendations": [], "message": "Model not loaded"}
 
-        # Call recommend_products() directly on the loaded model
-        raw_recs = cf_model.recommend_products(
-            user_id,
-            n_recommendations=limit,
-            exclude_rated=True
-        )
+        # cf_model is a dict with keys: svd_model, user_item_matrix, user_ids, product_ids
+        user_ids = cf_model.get("user_ids", [])
+        product_ids = cf_model.get("product_ids", [])
+        user_item_matrix = cf_model.get("user_item_matrix")
+        svd_model = cf_model.get("svd_model")
+
+        if user_id not in user_ids:
+            return {"recommendations": [], "message": "User not found in model", "userId": user_id}
+
+        import numpy as np
+
+        user_idx = user_ids.index(user_id)
+
+        # Get the user's latent factors
+        user_vector = user_item_matrix[user_idx]
+
+        # Transform using SVD to get scores for all products
+        user_factors = svd_model.transform(user_item_matrix)
+        scores = user_factors[user_idx] @ svd_model.components_
+
+        # Exclude already rated products (non-zero entries)
+        rated_mask = np.array(user_item_matrix[user_idx]).flatten() > 0
+        scores[rated_mask] = -np.inf
+
+        # Get top N product indices
+        top_indices = np.argsort(scores)[::-1][:limit]
 
         recommendations = [
             {
-                "product_id": str(pid),
-                "predicted_rating": float(rating)
+                "product_id": str(product_ids[idx]),
+                "predicted_rating": float(scores[idx])
             }
-            for pid, rating in raw_recs
+            for idx in top_indices
+            if scores[idx] != -np.inf
         ]
 
         return {"recommendations": recommendations, "userId": user_id}
