@@ -35,7 +35,7 @@ const Recommendations: React.FC = () => {
         setLoading(true);
         setError(null);
 
-        const storedUser = localStorage.getItem('user');
+        const storedUser = localStorage.getItem('userInfo');
         let userId = '';
 
         if (storedUser) {
