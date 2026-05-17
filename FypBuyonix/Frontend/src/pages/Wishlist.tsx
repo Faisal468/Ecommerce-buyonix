@@ -117,7 +117,7 @@ const Wishlist: React.FC = () => {
         ) : (
           <>
             {/* Wishlist Items Grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6 mb-8">
+            <div className="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-6 mb-8">
               {wishlistItems.map((item) => {
                 const imageUrl = item.images?.[0] || 'https://via.placeholder.com/300';
                 const discountPercent = item.discount && item.discount > 0 ? `-${item.discount}%` : null;
