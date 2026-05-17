@@ -3,7 +3,6 @@
  * Uses real MongoDB ObjectIds for personalized recommendations
  */
 
-const { spawn } = require('child_process');
 const path = require('path');
 const fs = require('fs');
 const Product = require('../models/product');
@@ -11,13 +10,50 @@ const User = require('../models/user');
 const Interaction = require('../models/interaction');
 
 const AI_MODELS_DIR = path.join(__dirname, '..', 'ai_models');
-const CF_INTEGRATION_SCRIPT = path.join(AI_MODELS_DIR, 'cf_integration.py');
-const PYTHON_PATH = process.env.PYTHON_PATH || 'python';
+const RAILWAY_AI_URL = process.env.VISUAL_SEARCH_URL || 'https://ecommerce-buyonix-production.up.railway.app';
 
 class CFRecommender {
   constructor() {
     this.modelReady = false;
     this.initializationError = null;
+  }
+
+  /**
+   * Make HTTP request to Railway AI service
+   */
+  async railwayRequest(endpoint, method = 'GET', data = null) {
+    const url = `${RAILWAY_AI_URL}${endpoint}`;
+    const urlObj = new URL(url);
+    const transport = require('https');
+
+    return new Promise((resolve, reject) => {
+      const body = data ? JSON.stringify(data) : null;
+      const req = transport.request({
+        hostname: urlObj.hostname,
+        port: urlObj.port || 443,
+        path: urlObj.pathname + urlObj.search,
+        method: method,
+        headers: {
+          'Content-Type': 'application/json',
+          ...(body && { 'Content-Length': Buffer.byteLength(body) })
+        }
+      }, (res) => {
+        let responseBody = '';
+        res.on('data', chunk => responseBody += chunk);
+        res.on('end', () => {
+          try {
+            resolve(JSON.parse(responseBody));
+          } catch (e) {
+            reject(new Error(`Invalid JSON response: ${responseBody}`));
+          }
+        });
+      });
+
+      req.on('error', reject);
+      req.setTimeout(120000, () => reject(new Error('Request timeout')));
+      if (body) req.write(body);
+      req.end();
+    });
   }
 
   /**
@@ -77,37 +113,13 @@ class CFRecommender {
   }
 
   /**
-   * Train CF model by passing interactions to Python via stdin
+   * Train CF model by passing interactions to Railway AI
    */
-  trainModel(interactions) {
-    return new Promise((resolve, reject) => {
-      const python = spawn(PYTHON_PATH, [CF_INTEGRATION_SCRIPT, 'train']);
-
-      let output = '';
-      let errorOutput = '';
-
-      python.stdout.on('data', (data) => { output += data.toString(); });
-      python.stderr.on('data', (data) => { errorOutput += data.toString(); });
-      python.on('error', (err) => {
-        reject(new Error(`Failed to start Python: ${err.message}`));
-      });
-
-      python.on('close', (code) => {
-        if (code !== 0) return reject(new Error(`Python train failed (code ${code}): ${errorOutput}`));
-        try {
-          const result = JSON.parse(output);
-          if (result.error) reject(new Error(result.error));
-          else if (result.stats) resolve(result.stats);
-          else reject(new Error('Unknown error from Python model'));
-        } catch (e) {
-          reject(new Error(`Failed to parse Python output: ${e.message}`));
-        }
-      });
-
-      // Send interactions via stdin
-      python.stdin.write(JSON.stringify({ interactions }));
-      python.stdin.end();
-    });
+  async trainModel(interactions) {
+    const result = await this.railwayRequest('/cf/train', 'POST', { interactions });
+    if (result.error) throw new Error(result.error);
+    if (result.stats) return result.stats;
+    throw new Error('Unknown error from Railway AI model');
   }
 
   /**
@@ -115,16 +127,25 @@ class CFRecommender {
    */
   async initialize() {
     return new Promise(async (resolve) => {
-      if (!fs.existsSync(CF_INTEGRATION_SCRIPT)) {
-        this.initializationError = 'CF integration script not found';
-        console.warn('⚠️  CF model not available:', this.initializationError);
-        resolve(false);
-        return;
-      }
-
       console.log('🤖 Initializing Collaborative Filtering model...');
 
       try {
+        // Check Railway is available
+        const health = await this.railwayRequest('/health', 'GET');
+        if (!health || health.status !== 'healthy') {
+          console.warn('⚠️  Railway AI service not available');
+          resolve(false);
+          return;
+        }
+
+        // CF model already loaded on Railway (cf_model.pkl)
+        if (health.cf_model === true) {
+          console.log('✓ CF Model already loaded on Railway');
+          this.modelReady = true;
+          resolve(true);
+          return;
+        }
+
         // Fetch real interactions from MongoDB
         let interactions = await this.getRealInteractions();
         let source = 'real_interactions';
@@ -139,12 +160,6 @@ class CFRecommender {
           console.warn('⚠️  No data available for model training');
           resolve(false);
           return;
-        }
-
-        // Delete old model to force retraining
-        const modelPath = path.join(AI_MODELS_DIR, 'cf_model.pkl');
-        if (fs.existsSync(modelPath)) {
-          try { fs.unlinkSync(modelPath); } catch (e) { /* ignore */ }
         }
 
         console.log(`  ℹ️  Training with ${interactions.length} interactions (${source})`);
@@ -169,67 +184,29 @@ class CFRecommender {
   }
 
   /**
-   * Get recommendations from Python model
+   * Get recommendations from Railway AI model
    */
   async getRecommendations(userId, numRecommendations = 5) {
-    return new Promise((resolve, reject) => {
-      if (!this.modelReady) return reject(new Error('CF model not initialized'));
+    if (!this.modelReady) throw new Error('CF model not initialized');
 
-      const python = spawn(PYTHON_PATH, [
-        CF_INTEGRATION_SCRIPT, 'recommend', String(userId), String(numRecommendations)
-      ]);
+    const result = await this.railwayRequest(
+      `/recommendations/${userId}?limit=${numRecommendations}`,
+      'GET'
+    );
 
-      let output = '';
-      let errorOutput = '';
-
-      python.stdout.on('data', (data) => { output += data.toString(); });
-      python.stderr.on('data', (data) => { errorOutput += data.toString(); });
-      python.on('error', (err) => {
-        reject(new Error(`Failed to start Python: ${err.message}`));
-      });
-
-      python.on('close', (code) => {
-        if (code !== 0) return reject(new Error(`Python failed (code ${code}): ${errorOutput}`));
-        try {
-          const result = JSON.parse(output);
-          if (result.error) reject(new Error(result.error));
-          else if (result.success) resolve(result.recommendations || []);
-          else reject(new Error('Unknown error'));
-        } catch (e) {
-          reject(new Error(`Parse error: ${e.message}`));
-        }
-      });
-    });
+    if (result.error) throw new Error(result.error);
+    if (result.recommendations !== undefined) return result.recommendations;
+    throw new Error('Unknown error');
   }
 
   /**
-   * Get model statistics
+   * Get model statistics from Railway
    */
   async getModelStats() {
-    return new Promise((resolve, reject) => {
-      const python = spawn(PYTHON_PATH, [CF_INTEGRATION_SCRIPT, 'stats']);
-
-      let output = '';
-      let errorOutput = '';
-
-      python.stdout.on('data', (data) => { output += data.toString(); });
-      python.stderr.on('data', (data) => { errorOutput += data.toString(); });
-      python.on('error', (err) => {
-        reject(new Error(`Failed to start Python: ${err.message}`));
-      });
-
-      python.on('close', (code) => {
-        if (code !== 0) return reject(new Error(`Python failed: ${errorOutput}`));
-        try {
-          const result = JSON.parse(output);
-          if (result.error) reject(new Error(result.error));
-          else if (result.stats) resolve(result.stats);
-          else reject(new Error('Unknown error'));
-        } catch (e) {
-          reject(new Error(`Parse error: ${e.message}`));
-        }
-      });
-    });
+    const result = await this.railwayRequest('/health', 'GET');
+    if (result.error) throw new Error(result.error);
+    if (result.stats) return result.stats;
+    return result;
   }
 
   /**
@@ -237,12 +214,6 @@ class CFRecommender {
    */
   async retrain() {
     console.log('🔄 Starting model retraining...');
-
-    const modelPath = path.join(AI_MODELS_DIR, 'cf_model.pkl');
-    if (fs.existsSync(modelPath)) {
-      fs.unlinkSync(modelPath);
-      console.log('  ✓ Old model file deleted');
-    }
 
     let interactions = await this.getRealInteractions();
     let source = 'real_interactions';
