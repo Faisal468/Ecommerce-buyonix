@@ -49,6 +49,9 @@ mongoose.connect(process.env.DB_URI).then(() => {
 });
 
 // Use express-session instead of cookie-session
+
+app.set('trust proxy', 1);
+
 app.use(
     session({
         name: "session",
