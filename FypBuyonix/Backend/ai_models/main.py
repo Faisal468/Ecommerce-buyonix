@@ -56,10 +56,59 @@ def get_recommendations(user_id: str, limit: int = 10):
     try:
         if cf_model is None:
             return {"recommendations": [], "message": "Model not loaded"}
-        return {"recommendations": [], "userId": user_id}
+
+        # Call recommend_products() directly on the loaded model
+        raw_recs = cf_model.recommend_products(
+            user_id,
+            n_recommendations=limit,
+            exclude_rated=True
+        )
+
+        recommendations = [
+            {
+                "product_id": str(pid),
+                "predicted_rating": float(rating)
+            }
+            for pid, rating in raw_recs
+        ]
+
+        return {"recommendations": recommendations, "userId": user_id}
+
     except Exception as e:
+        print(f"Recommendation error: {e}")
         return {"recommendations": [], "error": str(e)}
 
+@app.post("/cf/train")
+async def train_cf(request: Request):
+    try:
+        import pandas as pd
+        from collaborative_filtering import CollaborativeFilteringModel
+
+        data = await request.json()
+        interactions = data.get("interactions", [])
+
+        if not interactions:
+            return {"error": "No interactions provided"}
+
+        df = pd.DataFrame(interactions)
+        df = df.rename(columns={
+            'userId': 'user_id',
+            'productId': 'product_id',
+            'rating': 'rating'
+        })[['user_id', 'product_id', 'rating']]
+        df = df.drop_duplicates(subset=['user_id', 'product_id'], keep='last')
+
+        global cf_model
+        cf_model = CollaborativeFilteringModel(n_factors=10)
+        cf_model.train(df)
+        cf_model.save_model("cf_model.pkl")
+
+        stats = cf_model.get_model_stats()
+        return {"success": True, "stats": stats}
+
+    except Exception as e:
+        print(f"Training error: {e}")
+        return {"error": str(e)}
 
 @app.post("/extract")
 async def extract_features(request: Request):
