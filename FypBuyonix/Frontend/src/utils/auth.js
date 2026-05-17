@@ -17,7 +17,7 @@ export const checkAuthStatus = async () => {
       const userData = await response.json();
       return userData;
     }
-    throw new Error("Authentication failed");
+     return null ;
   } catch (error) {
     console.error("Auth check failed:", error);
     return null;
