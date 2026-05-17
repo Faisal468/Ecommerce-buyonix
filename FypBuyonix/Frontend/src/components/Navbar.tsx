@@ -132,13 +132,34 @@ const Navbar = () => {
   return (
     <nav className="fixed top-0 left-0 right-0 w-full bg-white shadow-sm border-b border-gray-200 z-40">
       {/* ── Main bar ── */}
-      <div className="max-w-7xl mx-auto flex items-center justify-between px-4 sm:px-6 py-3">
+      <div className="max-w-7xl mx-auto flex items-center gap-2 sm:gap-3 px-4 sm:px-6 py-3">
 
         {/* Logo */}
         <Link to="/" className="flex flex-col items-center flex-shrink-0">
           <img src={logo} alt="BUYONIX Logo" className="h-8 w-8 sm:h-10 sm:w-10 object-contain" />
           <h1 className="font-bold text-xs sm:text-sm text-gray-800">BUYONIX</h1>
         </Link>
+
+        {/* Mobile-only: center search bar with visual search */}
+        <div className="flex md:hidden flex-1 items-center border border-gray-200 rounded-full px-3 py-1.5 bg-gray-50 min-w-0 gap-1">
+          <FaSearch className="text-gray-400 flex-shrink-0 text-sm" />
+          <input
+            type="text"
+            placeholder="Search products..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            onKeyDown={(e) => { if (e.key === 'Enter') handleSearch(); }}
+            className="flex-1 min-w-0 bg-transparent outline-none text-sm text-gray-700 placeholder-gray-400"
+          />
+          <button
+            onClick={() => setShowVisualSearch(true)}
+            className="flex-shrink-0 p-1 hover:bg-teal-50 rounded-full transition-colors"
+            aria-label="Visual Search"
+            title="Search by image"
+          >
+            <BsCamera className="text-teal-600 text-base" />
+          </button>
+        </div>
 
         {/* Desktop: Nav links */}
         <ul className="hidden md:flex space-x-6 lg:space-x-8 text-gray-700 font-medium ml-6">

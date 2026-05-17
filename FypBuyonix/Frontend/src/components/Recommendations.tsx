@@ -88,7 +88,7 @@ const Recommendations: React.FC = () => {
             <p className="text-gray-600">AI-Based personalized product suggestions</p>
           </div>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-6">
           {[1, 2, 3, 4, 5].map((i) => (
             <div key={i} className="bg-gray-200 rounded-lg h-80 animate-pulse"></div>
           ))}
@@ -132,7 +132,7 @@ const Recommendations: React.FC = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-6">
         {recommendations.map((product) => {
           const discountPercent = product.discount && product.discount > 0 ? `-${product.discount}%` : null;
           const imageUrl = product.images && product.images.length > 0
