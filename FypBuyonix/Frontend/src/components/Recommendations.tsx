@@ -47,6 +47,11 @@ const Recommendations: React.FC = () => {
           }
         }
 
+        if (!userId || userId.length !== 24) {
+         setLoading(false);
+         return;
+         }
+
        
         const response = await fetch(`${BACKEND_URL}/product/recommendations/${userId}?num=5`);
 
