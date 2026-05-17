@@ -41,16 +41,13 @@ const Recommendations: React.FC = () => {
         if (storedUser) {
           try {
             const user = JSON.parse(storedUser);
-            userId = user._id;
+            userId = user._id || user.id;
           } catch (e) {
             console.error("Error parsing user from localStorage", e);
           }
         }
 
-        if (!userId || userId.length !== 24) {
-          userId = '65d8c12e9f1a2b3c4d5e6f78';
-        }
-
+       
         const response = await fetch(`${BACKEND_URL}/product/recommendations/${userId}?num=5`);
 
         if (!response.ok) {
