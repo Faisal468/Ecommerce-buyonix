@@ -40,7 +40,7 @@ const io = new Server(server, {
     }
 });
 
-//connect to mongodb
+// Connect to MongoDB
 mongoose.connect(process.env.DB_URI).then(() => {
     console.log("✓ Connected to MongoDB");
 }).catch((err) => {
@@ -48,31 +48,10 @@ mongoose.connect(process.env.DB_URI).then(() => {
     process.exit(1);
 });
 
-// Use express-session instead of cookie-session
-
+// ✅ 1. Trust proxy (required for Azure HTTPS detection)
 app.set('trust proxy', 1);
 
-app.use(
-    session({
-        name: "session",
-        secret: SESSION_SECRET,
-        resave: false,
-        saveUninitialized: false,
-        cookie: {
-            maxAge: 24 * 60 * 60 * 1000,
-            secure: NODE_ENV === "production", // HTTPS only in production
-            httpOnly: true,
-            sameSite: NODE_ENV === "production" ? "none" : "lax",
-        }
-    })
-);
-
-app.use(passport.initialize());
-app.use(passport.session());
-
-app.use(express.json({ limit: '50mb' }));
-app.use(express.urlencoded({ extended: true, limit: '50mb' }));
-
+// ✅ 2. CORS first (before session and passport)
 app.use(
     cors({
         origin: ALLOWED_ORIGINS,
@@ -82,6 +61,31 @@ app.use(
     })
 );
 
+// ✅ 3. Session (hardcoded secure + sameSite for cross-origin)
+app.use(
+    session({
+        name: "session",
+        secret: SESSION_SECRET,
+        resave: false,
+        saveUninitialized: false,
+        cookie: {
+            maxAge: 24 * 60 * 60 * 1000,
+            secure: true,       // ✅ hardcoded for Azure HTTPS
+            httpOnly: true,
+            sameSite: "none",   // ✅ hardcoded for cross-origin Vercel ↔ Azure
+        }
+    })
+);
+
+// ✅ 4. Passport
+app.use(passport.initialize());
+app.use(passport.session());
+
+// ✅ 5. Body parsers
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+
+// ✅ 6. Routes
 app.use("/auth", authRoute);
 app.use("/seller", sellerRoute);
 app.use("/product", require("./routes/product"));
@@ -91,29 +95,23 @@ app.use("/bargain", require("./routes/bargain"));
 app.use("/chat", require("./routes/chat"));
 app.use("/support", require("./routes/support"));
 
-const port = process.env.PORT || 5000;
-
 // Socket.io connection handling
 io.on("connection", (socket) => {
     console.log("User connected:", socket.id);
 
-    // Join a conversation room
     socket.on("join_room", (conversationId) => {
         socket.join(conversationId);
         console.log(`User ${socket.id} joined room ${conversationId}`);
     });
 
-    // Leave a room
     socket.on("leave_room", (conversationId) => {
         socket.leave(conversationId);
     });
 
-    // Send message
     socket.on("send_message", async (data) => {
         try {
             const { conversationId, senderId, senderType, message } = data;
 
-            // Save message to database
             const newMessage = new Message({
                 conversationId,
                 senderId,
@@ -122,7 +120,6 @@ io.on("connection", (socket) => {
             });
             await newMessage.save();
 
-            // Update conversation
             await Conversation.findByIdAndUpdate(conversationId, {
                 lastMessage: message.substring(0, 100),
                 lastMessageAt: new Date(),
@@ -131,7 +128,6 @@ io.on("connection", (socket) => {
                 }
             });
 
-            // Broadcast to room
             io.to(conversationId).emit("receive_message", {
                 _id: newMessage._id,
                 conversationId,
@@ -146,7 +142,6 @@ io.on("connection", (socket) => {
         }
     });
 
-    // Typing indicator
     socket.on("typing", (data) => {
         socket.to(data.conversationId).emit("user_typing", data);
     });
@@ -169,7 +164,7 @@ cfRecommender.initialize().then((success) => {
 // Use server.listen instead of app.listen for Socket.io
 server.listen(PORT, () => {
     console.log(`\n========================================`);
-    console.log(`🚀 Server started successfully`);
+    console.log(` Server started successfully`);
     console.log(`Environment: ${NODE_ENV}`);
     console.log(`Port: ${PORT}`);
     console.log(`Database: Connected`);
