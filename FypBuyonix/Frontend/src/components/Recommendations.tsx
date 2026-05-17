@@ -35,24 +35,39 @@ const Recommendations: React.FC = () => {
         setLoading(true);
         setError(null);
 
-        // Get real userId from localStorage
-        const storedUser = localStorage.getItem('user');
+        // Try all possible localStorage keys
         let userId = '';
+        const possibleKeys = ['user', 'userData', 'currentUser', 'authUser'];
 
-        if (storedUser) {
-          try {
-            const user = JSON.parse(storedUser);
-            userId = user._id;
-          } catch (e) {
-            console.error('Error parsing user from localStorage', e);
+        for (const key of possibleKeys) {
+          const stored = localStorage.getItem(key);
+          if (stored) {
+            try {
+              const parsed = JSON.parse(stored);
+              // Support both _id and id formats
+              userId = parsed._id || parsed.id || '';
+              if (userId) break;
+            } catch {
+              // not JSON, skip
+            }
           }
         }
 
-        // ✅ If not logged in or invalid ID, silently return — no fake fallback
-        if (!userId || userId.length !== 24) {
+        // Also check if token exists separately
+        if (!userId) {
+          console.log('No user found in localStorage — not logged in');
           setLoading(false);
           return;
         }
+
+        // Validate MongoDB ObjectId length (24 chars)
+        if (userId.length !== 24) {
+          console.log('Invalid userId format:', userId);
+          setLoading(false);
+          return;
+        }
+
+        console.log('Fetching recommendations for user:', userId);
 
         const response = await fetch(`${BACKEND_URL}/product/recommendations/${userId}?num=5`);
 
