@@ -7,8 +7,8 @@
 const { spawn, execSync } = require('child_process');
 const path = require('path');
 
-// Server configuration
-const VISUAL_SEARCH_SERVER_URL = process.env.VISUAL_SEARCH_URL || 'http://localhost:5001';
+// Server configuration - now points to Railway instead of localhost
+const VISUAL_SEARCH_SERVER_URL = process.env.VISUAL_SEARCH_URL || 'https://ecommerce-buyonix-production.up.railway.app';
 
 class VisualSearchHelper {
     constructor() {
@@ -58,10 +58,13 @@ class VisualSearchHelper {
 
     /**
      * Start the Flask server as a background process
+     * Since we're using Railway, skip local spawn entirely
      */
     startServer() {
+        // Railway URL detected - no local server needed
         if (!this.serverUrl.includes('localhost') && !this.serverUrl.includes('127.0.0.1')) {
             console.log('ℹ️  Using remote visual search server:', this.serverUrl);
+            this.isServerRunning = true; // Mark as running since Railway handles it
             return;
         }
         try {
