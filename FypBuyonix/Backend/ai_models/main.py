@@ -167,10 +167,11 @@ def get_recommendations(user_id: str, limit: int = 10):
 
         user_idx = user_ids.index(user_id)
 
-        user_factors = svd_model.transform(user_item_matrix)
+        dense_matrix = user_item_matrix.toarray()
+        user_factors = svd_model.transform(dense_matrix)
         scores = user_factors[user_idx] @ svd_model.components_
 
-        rated_mask = np.asarray(user_item_matrix[user_idx].todense()).flatten() > 0
+        rated_mask = dense_matrix[user_idx] > 0
         scores[rated_mask] = -np.inf
 
         top_indices = np.argsort(scores)[::-1][:limit]
