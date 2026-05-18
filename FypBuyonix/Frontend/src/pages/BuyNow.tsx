@@ -368,14 +368,14 @@ const BuyNow: React.FC = () => {
             <div className="bg-white rounded-lg shadow p-6">
               <h2 className="text-xl font-bold text-gray-900 mb-6">Payment Method</h2>
 
-              <div className="flex gap-4 mb-6">
+              <div className="grid grid-cols-4 gap-2 mb-6">
                 {[
                   { id: 'easypaisa', label: 'EasyPaisa', icon: '📱' },
                   { id: 'jazzcash', label: 'JazzCash', icon: '📲' },
                   { id: 'card', label: 'Card', icon: '💳' },
                   { id: 'cod', label: 'COD', icon: '📦' },
                 ].map((method) => (
-                  <label key={method.id} className="flex-1 cursor-pointer">
+                  <label key={method.id} className="cursor-pointer">
                     <input
                       type="radio"
                       name="paymentMethod"
@@ -420,7 +420,7 @@ const BuyNow: React.FC = () => {
                       </label>
                       <input
                         type="text"
-                        value={formData.paymentMethod === 'easypaisa' ? '0312-3456789' : '0300-1234567'}
+                        value={formData.paymentMethod === 'easypaisa' ? '0312-3456789' : '0300-0579453'}
                         disabled
                         className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-600"
                       />
