@@ -35,16 +35,7 @@ import Profile from './pages/Profile';
 import MyOrders from './pages/MyOrders';
 import Settings from './pages/Settings';
 import Footer from './components/Footer';
-// import Sidebar from './admin/components/Sidebar.tsx';;
-// import DashboardContent from './admin/components/DashboardContent.tsx';;
-// import UserManagement from './admin/components/UserManagement.tsx';
-// import ProductManagement from './admin/components/ProductManagement.tsx';
-// import OrderManagement from './admin/components/OrderManagement';  
-// import CustomerSupport from './admin/components/CustomerSupport';
-// import AnalyticsReports from './admin/components/AnalyticsReports';
-// import PendingSellers from './admin/components/PendingSellers';
-// import PaymentVerification from './admin/components/PaymentVerification';
-// import SellerPayouts from './admin/components/SellerPayouts';
+import AdminApp from './admin/AdminApp';
 
 
 
@@ -53,13 +44,14 @@ import Footer from './components/Footer';
 function App() {
   const location = useLocation();
   const isSellerRoute = location.pathname.startsWith('/seller-') || location.pathname === '/become-seller' || location.pathname === '/seller-registration' || location.pathname === '/seller-registration-success';
+  const isAdminRoute = location.pathname.startsWith('/admin');
 
   return (
     <CartProvider>
       <ScrollToTop />
       <div className="min-h-screen bg-gray-50">
-        {!isSellerRoute && <Navbar />}
-        <div className={!isSellerRoute ? "pt-20" : ""}>
+        {!isSellerRoute && !isAdminRoute && <Navbar />}
+        <div className={!isSellerRoute && !isAdminRoute ? "pt-20" : ""}>
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/signup" element={<SignUp />} />
@@ -97,11 +89,11 @@ function App() {
             <Route path="/seller-chats" element={<SellerChats />} />
             <Route path="/seller-support" element={<SellerSupport />} />
 
-
+            <Route path="/admin" element={<AdminApp />} />
           </Routes>
         </div>
-        {!isSellerRoute && <ShoppingCart />}
-        {!isSellerRoute && <Footer />}
+        {!isSellerRoute && !isAdminRoute && <ShoppingCart />}
+        {!isSellerRoute && !isAdminRoute && <Footer />}
       </div>
     </CartProvider>
   );
