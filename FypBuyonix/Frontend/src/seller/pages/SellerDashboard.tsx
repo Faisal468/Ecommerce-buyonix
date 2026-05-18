@@ -12,16 +12,15 @@ const SellerDashboard = () => {
     averageOrder: 0
   });
   const [loading, setLoading] = useState(true);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
-    // Get seller info from localStorage
     const sellerData = localStorage.getItem('sellerInfo');
     if (sellerData) {
       const seller = JSON.parse(sellerData);
       setSellerInfo(seller);
       fetchStats(seller.id);
     } else {
-      // Redirect to login if not authenticated
       navigate('/become-seller');
     }
   }, [navigate]);
@@ -29,7 +28,6 @@ const SellerDashboard = () => {
   const fetchStats = async (sellerId: string) => {
     try {
       setLoading(true);
-      // Fetch products count
       const productsResponse = await fetch(`${import.meta.env.VITE_API_URL}/product/seller/${sellerId}`, {
         credentials: 'include',
       });
@@ -43,10 +41,6 @@ const SellerDashboard = () => {
           }));
         }
       }
-
-      // TODO: Fetch orders and revenue when order system is implemented
-      // For now, these will be 0
-
     } catch (error) {
       console.error('Error fetching stats:', error);
     } finally {
@@ -67,11 +61,19 @@ const SellerDashboard = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
+      {/* Mobile overlay */}
+      {mobileMenuOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
+          onClick={() => setMobileMenuOpen(false)}
+        />
+      )}
+
       {/* Sidebar */}
-      <div className="w-64 bg-white shadow-lg fixed top-0 left-0 h-screen overflow-y-auto">
+      <div className={`w-64 bg-white shadow-lg fixed top-0 left-0 h-screen overflow-y-auto z-50 transform transition-transform duration-300 ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0`}>
         {/* Logo */}
         <div className="p-6 border-b">
-          <Link to="/" className="flex items-center space-x-2">
+          <Link to="/" className="flex items-center space-x-2" onClick={() => setMobileMenuOpen(false)}>
             <img src={logo} alt="BUYONIX" className="h-10 w-10" />
           </Link>
         </div>
@@ -81,6 +83,7 @@ const SellerDashboard = () => {
           <div className="space-y-2">
             <Link
               to="/seller-dashboard"
+              onClick={() => setMobileMenuOpen(false)}
               className="flex items-center space-x-3 px-4 py-3 bg-teal-600 text-white rounded-lg font-medium"
             >
               <span className="text-xl">📊</span>
@@ -89,6 +92,7 @@ const SellerDashboard = () => {
 
             <Link
               to="/seller-products"
+              onClick={() => setMobileMenuOpen(false)}
               className="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg"
             >
               <span className="text-xl">📦</span>
@@ -97,6 +101,7 @@ const SellerDashboard = () => {
 
             <Link
               to="/seller-orders"
+              onClick={() => setMobileMenuOpen(false)}
               className="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg"
             >
               <span className="text-xl">📋</span>
@@ -105,6 +110,7 @@ const SellerDashboard = () => {
 
             <Link
               to="/seller-analytics"
+              onClick={() => setMobileMenuOpen(false)}
               className="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg"
             >
               <span className="text-xl">📈</span>
@@ -113,6 +119,7 @@ const SellerDashboard = () => {
 
             <Link
               to="/seller-payouts"
+              onClick={() => setMobileMenuOpen(false)}
               className="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg"
             >
               <span className="text-xl">💰</span>
@@ -121,6 +128,7 @@ const SellerDashboard = () => {
 
             <Link
               to="/seller-chats"
+              onClick={() => setMobileMenuOpen(false)}
               className="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg"
             >
               <span className="text-xl">💬</span>
@@ -129,6 +137,7 @@ const SellerDashboard = () => {
 
             <Link
               to="/seller-support"
+              onClick={() => setMobileMenuOpen(false)}
               className="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg"
             >
               <span className="text-xl">🎫</span>
@@ -160,6 +169,7 @@ const SellerDashboard = () => {
           </button>
           <Link
             to="/"
+            onClick={() => setMobileMenuOpen(false)}
             className="flex items-center justify-center space-x-2 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg border border-gray-300"
           >
             <span>←</span>
@@ -169,83 +179,94 @@ const SellerDashboard = () => {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 p-8 ml-64">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-800">Seller Dashboard</h1>
-          <p className="text-gray-600 mt-1">
-            Welcome back{sellerInfo?.fullName ? `, ${sellerInfo.fullName}` : ''}! Here's your store overview.
-          </p>
+      <div className="flex-1 md:ml-64">
+        {/* Mobile Top Bar */}
+        <div className="flex md:hidden items-center justify-between px-4 py-3 bg-white border-b shadow-sm sticky top-0 z-30">
+          <button
+            onClick={() => setMobileMenuOpen(true)}
+            className="p-2 rounded-lg text-gray-600 hover:bg-gray-100"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+          <span className="font-semibold text-gray-800">Dashboard</span>
+          <img src={logo} alt="BUYONIX" className="h-8 w-8" />
         </div>
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          {/* Total Revenue */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <div className="flex items-center justify-between mb-4">
-              <span className="text-sm font-medium text-gray-600">Total Revenue</span>
-              <span className="text-2xl">💵</span>
-            </div>
-            <div className="text-3xl font-bold text-gray-800 mb-2">${stats.totalRevenue.toFixed(2)}</div>
-            <div className="text-sm text-gray-500">No sales yet</div>
+        <div className="p-4 sm:p-8">
+          {/* Header */}
+          <div className="mb-6 sm:mb-8">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">Seller Dashboard</h1>
+            <p className="text-gray-600 mt-1">
+              Welcome back{sellerInfo?.fullName ? `, ${sellerInfo.fullName}` : ''}! Here's your store overview.
+            </p>
           </div>
 
-          {/* Total Orders */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <div className="flex items-center justify-between mb-4">
-              <span className="text-sm font-medium text-gray-600">Total Orders</span>
-              <span className="text-2xl">📦</span>
+          {/* Stats Grid */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 mb-6 sm:mb-8">
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
+              <div className="flex items-center justify-between mb-3 sm:mb-4">
+                <span className="text-xs sm:text-sm font-medium text-gray-600">Total Revenue</span>
+                <span className="text-xl sm:text-2xl">💵</span>
+              </div>
+              <div className="text-2xl sm:text-3xl font-bold text-gray-800 mb-1 sm:mb-2">${stats.totalRevenue.toFixed(2)}</div>
+              <div className="text-xs sm:text-sm text-gray-500">No sales yet</div>
             </div>
-            <div className="text-3xl font-bold text-gray-800 mb-2">{stats.totalOrders}</div>
-            <div className="text-sm text-gray-500">No orders yet</div>
+
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
+              <div className="flex items-center justify-between mb-3 sm:mb-4">
+                <span className="text-xs sm:text-sm font-medium text-gray-600">Total Orders</span>
+                <span className="text-xl sm:text-2xl">📦</span>
+              </div>
+              <div className="text-2xl sm:text-3xl font-bold text-gray-800 mb-1 sm:mb-2">{stats.totalOrders}</div>
+              <div className="text-xs sm:text-sm text-gray-500">No orders yet</div>
+            </div>
+
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
+              <div className="flex items-center justify-between mb-3 sm:mb-4">
+                <span className="text-xs sm:text-sm font-medium text-gray-600">Products Listed</span>
+                <span className="text-xl sm:text-2xl">🏷️</span>
+              </div>
+              <div className="text-2xl sm:text-3xl font-bold text-gray-800 mb-1 sm:mb-2">{stats.totalProducts}</div>
+              <div className="text-xs sm:text-sm text-gray-500">
+                {stats.totalProducts === 0 ? 'Start adding products' : 'Active products'}
+              </div>
+            </div>
+
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
+              <div className="flex items-center justify-between mb-3 sm:mb-4">
+                <span className="text-xs sm:text-sm font-medium text-gray-600">Average Order</span>
+                <span className="text-xl sm:text-2xl">📈</span>
+              </div>
+              <div className="text-2xl sm:text-3xl font-bold text-gray-800 mb-1 sm:mb-2">${stats.averageOrder.toFixed(2)}</div>
+              <div className="text-xs sm:text-sm text-gray-500">No orders yet</div>
+            </div>
           </div>
 
-          {/* Products Listed */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <div className="flex items-center justify-between mb-4">
-              <span className="text-sm font-medium text-gray-600">Products Listed</span>
-              <span className="text-2xl">🏷️</span>
+          {/* Quick Actions */}
+          {stats.totalProducts === 0 && (
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 sm:p-8 mb-6 sm:mb-8 text-center">
+              <div className="text-5xl sm:text-6xl mb-4">📦</div>
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-800 mb-2">Get Started</h2>
+              <p className="text-gray-600 mb-6">Add your first product to start selling on Buyonix!</p>
+              <Link
+                to="/seller-products"
+                className="inline-flex items-center space-x-2 bg-teal-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-teal-700 transition-colors"
+              >
+                <span>+</span>
+                <span>Add Your First Product</span>
+              </Link>
             </div>
-            <div className="text-3xl font-bold text-gray-800 mb-2">{stats.totalProducts}</div>
-            <div className="text-sm text-gray-500">
-              {stats.totalProducts === 0 ? 'Start adding products' : 'Active products'}
+          )}
+
+          {/* Recent Orders */}
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
+            <h2 className="text-lg sm:text-xl font-bold text-gray-800 mb-4 sm:mb-6">Recent Orders</h2>
+            <div className="text-center py-8 sm:py-12">
+              <div className="text-5xl sm:text-6xl mb-4">📋</div>
+              <p className="text-gray-600">No orders yet. Your orders will appear here once customers start purchasing your products.</p>
             </div>
-          </div>
-
-          {/* Average Order */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <div className="flex items-center justify-between mb-4">
-              <span className="text-sm font-medium text-gray-600">Average Order</span>
-              <span className="text-2xl">📈</span>
-            </div>
-            <div className="text-3xl font-bold text-gray-800 mb-2">${stats.averageOrder.toFixed(2)}</div>
-            <div className="text-sm text-gray-500">No orders yet</div>
-          </div>
-        </div>
-
-        {/* Quick Actions */}
-        {stats.totalProducts === 0 && (
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8 mb-8 text-center">
-            <div className="text-6xl mb-4">📦</div>
-            <h2 className="text-2xl font-bold text-gray-800 mb-2">Get Started</h2>
-            <p className="text-gray-600 mb-6">Add your first product to start selling on Buyonix!</p>
-            <Link
-              to="/seller-products"
-              className="inline-flex items-center space-x-2 bg-teal-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-teal-700 transition-colors"
-            >
-              <span>+</span>
-              <span>Add Your First Product</span>
-            </Link>
-          </div>
-        )}
-
-        {/* Recent Orders - Empty State */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <h2 className="text-xl font-bold text-gray-800 mb-6">Recent Orders</h2>
-
-          <div className="text-center py-12">
-            <div className="text-6xl mb-4">📋</div>
-            <p className="text-gray-600">No orders yet. Your orders will appear here once customers start purchasing your products.</p>
           </div>
         </div>
       </div>
@@ -254,4 +275,3 @@ const SellerDashboard = () => {
 };
 
 export default SellerDashboard;
-

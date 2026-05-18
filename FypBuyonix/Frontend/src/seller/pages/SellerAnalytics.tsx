@@ -61,6 +61,7 @@ const SellerAnalytics = () => {
   });
   const [loading, setLoading] = useState(true);
   const [orders, setOrders] = useState<Order[]>([]);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [monthlyData, setMonthlyData] = useState<MonthlyDataItem[]>([]);
   const [weeklyData, setWeeklyData] = useState<WeeklyDataItem[]>([]);
   const [categoryData, setCategoryData] = useState<CategoryDataItem[]>([]);
@@ -299,39 +300,38 @@ const SellerAnalytics = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
+      {/* Mobile overlay */}
+      {mobileMenuOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden" onClick={() => setMobileMenuOpen(false)} />
+      )}
+
       {/* Sidebar */}
-      <div className="w-64 bg-white shadow-lg fixed top-0 left-0 h-screen overflow-y-auto">
+      <div className={`w-64 bg-white shadow-lg fixed top-0 left-0 h-screen overflow-y-auto z-50 transform transition-transform duration-300 ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0`}>
         <div className="p-6 border-b">
-          <Link to="/" className="flex items-center space-x-2">
+          <Link to="/" className="flex items-center space-x-2" onClick={() => setMobileMenuOpen(false)}>
             <img src={logo} alt="BUYONIX" className="h-10 w-10" />
           </Link>
         </div>
 
         <nav className="p-4">
           <div className="space-y-2">
-            <Link to="/seller-dashboard" className="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg">
-              <span className="text-xl">📊</span>
-              <span>Dashboard</span>
+            <Link to="/seller-dashboard" onClick={() => setMobileMenuOpen(false)} className="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg">
+              <span className="text-xl">📊</span><span>Dashboard</span>
             </Link>
-            <Link to="/seller-products" className="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg">
-              <span className="text-xl">📦</span>
-              <span>Products</span>
+            <Link to="/seller-products" onClick={() => setMobileMenuOpen(false)} className="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg">
+              <span className="text-xl">📦</span><span>Products</span>
             </Link>
-            <Link to="/seller-orders" className="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg">
-              <span className="text-xl">📋</span>
-              <span>Orders</span>
+            <Link to="/seller-orders" onClick={() => setMobileMenuOpen(false)} className="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg">
+              <span className="text-xl">📋</span><span>Orders</span>
             </Link>
-            <Link to="/seller-analytics" className="flex items-center space-x-3 px-4 py-3 bg-teal-600 text-white rounded-lg font-medium">
-              <span className="text-xl">📈</span>
-              <span>Analytics</span>
+            <Link to="/seller-analytics" onClick={() => setMobileMenuOpen(false)} className="flex items-center space-x-3 px-4 py-3 bg-teal-600 text-white rounded-lg font-medium">
+              <span className="text-xl">📈</span><span>Analytics</span>
             </Link>
-            <Link to="/seller-payouts" className="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg">
-              <span className="text-xl">💰</span>
-              <span>Payouts</span>
+            <Link to="/seller-payouts" onClick={() => setMobileMenuOpen(false)} className="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg">
+              <span className="text-xl">💰</span><span>Payouts</span>
             </Link>
-            <Link to="/seller-chats" className="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg">
-              <span className="text-xl">💬</span>
-              <span>Chats</span>
+            <Link to="/seller-chats" onClick={() => setMobileMenuOpen(false)} className="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg">
+              <span className="text-xl">💬</span><span>Chats</span>
             </Link>
           </div>
         </nav>
@@ -350,20 +350,30 @@ const SellerAnalytics = () => {
             }}
             className="w-full flex items-center justify-center space-x-2 px-4 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium"
           >
-            <span>🚪</span>
-            <span>Logout</span>
+            <span>🚪</span><span>Logout</span>
           </button>
-          <Link to="/" className="flex items-center justify-center space-x-2 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg border border-gray-300">
-            <span>←</span>
-            <span>Back to Shopping</span>
+          <Link to="/" onClick={() => setMobileMenuOpen(false)} className="flex items-center justify-center space-x-2 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg border border-gray-300">
+            <span>←</span><span>Back to Shopping</span>
           </Link>
         </div>
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 p-8 ml-64">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-800">Analytics Dashboard</h1>
+      <div className="flex-1 md:ml-64">
+        {/* Mobile Top Bar */}
+        <div className="flex md:hidden items-center justify-between px-4 py-3 bg-white border-b shadow-sm sticky top-0 z-30">
+          <button onClick={() => setMobileMenuOpen(true)} className="p-2 rounded-lg text-gray-600 hover:bg-gray-100">
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+          <span className="font-semibold text-gray-800">Analytics</span>
+          <img src={logo} alt="BUYONIX" className="h-8 w-8" />
+        </div>
+
+        <div className="p-4 sm:p-8">
+        <div className="mb-6 sm:mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">Analytics Dashboard</h1>
           <p className="text-gray-600 mt-1">
             Welcome back{sellerInfo?.fullName ? `, ${sellerInfo.fullName}` : ''}! Here's your real-time store performance.
           </p>
@@ -613,6 +623,7 @@ const SellerAnalytics = () => {
               <div className="text-sm text-gray-600 mt-1">Products in Store</div>
             </div>
           </div>
+        </div>
         </div>
       </div>
     </div>

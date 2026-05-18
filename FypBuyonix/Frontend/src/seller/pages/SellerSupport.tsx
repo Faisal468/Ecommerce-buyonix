@@ -25,6 +25,7 @@ const SellerSupport = () => {
     const [selectedTicket, setSelectedTicket] = useState<string | null>(null);
     const [showNewForm, setShowNewForm] = useState(false);
     const [loading, setLoading] = useState(true);
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [submitting, setSubmitting] = useState(false);
     const [replyText, setReplyText] = useState('');
 
@@ -153,34 +154,39 @@ const SellerSupport = () => {
 
     return (
         <div className="min-h-screen bg-gray-50 flex">
-            {/* Sidebar — matching SellerDashboard */}
-            <div className="w-64 bg-white shadow-lg fixed top-0 left-0 h-screen overflow-y-auto" style={{ scrollbarWidth: 'none' }}>
+            {/* Mobile overlay */}
+            {mobileMenuOpen && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden" onClick={() => setMobileMenuOpen(false)} />
+            )}
+
+            {/* Sidebar */}
+            <div className={`w-64 bg-white shadow-lg fixed top-0 left-0 h-screen overflow-y-auto z-50 transform transition-transform duration-300 ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0`} style={{ scrollbarWidth: 'none' }}>
                 <div className="p-6 border-b">
-                    <Link to="/" className="flex items-center space-x-2">
+                    <Link to="/" className="flex items-center space-x-2" onClick={() => setMobileMenuOpen(false)}>
                         <img src={logo} alt="BUYONIX" className="h-10 w-10" />
                     </Link>
                 </div>
                 <nav className="p-4">
                     <div className="space-y-2">
-                        <Link to="/seller-dashboard" className="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg">
+                        <Link to="/seller-dashboard" onClick={() => setMobileMenuOpen(false)} className="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg">
                             <span className="text-xl">📊</span><span>Dashboard</span>
                         </Link>
-                        <Link to="/seller-products" className="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg">
+                        <Link to="/seller-products" onClick={() => setMobileMenuOpen(false)} className="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg">
                             <span className="text-xl">📦</span><span>Products</span>
                         </Link>
-                        <Link to="/seller-orders" className="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg">
+                        <Link to="/seller-orders" onClick={() => setMobileMenuOpen(false)} className="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg">
                             <span className="text-xl">📋</span><span>Orders</span>
                         </Link>
-                        <Link to="/seller-analytics" className="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg">
+                        <Link to="/seller-analytics" onClick={() => setMobileMenuOpen(false)} className="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg">
                             <span className="text-xl">📈</span><span>Analytics</span>
                         </Link>
-                        <Link to="/seller-payouts" className="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg">
+                        <Link to="/seller-payouts" onClick={() => setMobileMenuOpen(false)} className="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg">
                             <span className="text-xl">💰</span><span>Payouts</span>
                         </Link>
-                        <Link to="/seller-chats" className="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg">
+                        <Link to="/seller-chats" onClick={() => setMobileMenuOpen(false)} className="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg">
                             <span className="text-xl">💬</span><span>Chats</span>
                         </Link>
-                        <Link to="/seller-support" className="flex items-center space-x-3 px-4 py-3 bg-teal-600 text-white rounded-lg font-medium">
+                        <Link to="/seller-support" onClick={() => setMobileMenuOpen(false)} className="flex items-center space-x-3 px-4 py-3 bg-teal-600 text-white rounded-lg font-medium">
                             <span className="text-xl">🎫</span><span>Support</span>
                         </Link>
                     </div>
@@ -199,18 +205,30 @@ const SellerSupport = () => {
                     >
                         <span>🚪</span><span>Logout</span>
                     </button>
-                    <Link to="/" className="flex items-center justify-center space-x-2 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg border border-gray-300">
+                    <Link to="/" onClick={() => setMobileMenuOpen(false)} className="flex items-center justify-center space-x-2 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg border border-gray-300">
                         <span>←</span><span>Back to Shopping</span>
                     </Link>
                 </div>
             </div>
 
             {/* Main Content */}
-            <div className="flex-1 p-8 ml-64">
+            <div className="flex-1 md:ml-64">
+                {/* Mobile Top Bar */}
+                <div className="flex md:hidden items-center justify-between px-4 py-3 bg-white border-b shadow-sm sticky top-0 z-30">
+                    <button onClick={() => setMobileMenuOpen(true)} className="p-2 rounded-lg text-gray-600 hover:bg-gray-100">
+                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </button>
+                    <span className="font-semibold text-gray-800">Support</span>
+                    <img src={logo} alt="BUYONIX" className="h-8 w-8" />
+                </div>
+
+                <div className="p-4 sm:p-8">
                 {/* Header */}
-                <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+                <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 sm:mb-8 gap-4">
                     <div>
-                        <h1 className="text-3xl font-bold text-gray-800">Seller Support</h1>
+                        <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">Seller Support</h1>
                         <p className="text-gray-600 mt-1">Get help from the Buyonix support team</p>
                     </div>
                     {!showNewForm && (
@@ -397,6 +415,7 @@ const SellerSupport = () => {
                         </div>
                     </div>
                 )}
+                </div>
             </div>
         </div>
     );
