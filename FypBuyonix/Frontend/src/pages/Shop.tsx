@@ -43,8 +43,10 @@ const Shop: React.FC = () => {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [minRating, setMinRating] = useState<number>(0);
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const [searchResults, setSearchResults] = useState<Product[] | null>(null);
+  const [searchLoading, setSearchLoading] = useState(false);
 
-  const query = (searchParams.get('query') || '').trim().toLowerCase();
+  const query = (searchParams.get('query') || '').trim();
   const categoryParam = searchParams.get('category') || '';
 
   // Set initial category from URL param
@@ -54,7 +56,36 @@ const Shop: React.FC = () => {
     }
   }, [categoryParam, selectedCategories]);
 
-  // Fetch products with pagination
+  // When query changes, search on the backend so all products are searched (not just loaded ones)
+  useEffect(() => {
+    if (!query) {
+      setSearchResults(null);
+      return;
+    }
+    let cancelled = false;
+    const doSearch = async () => {
+      setSearchLoading(true);
+      try {
+        const response = await fetch(
+          `${import.meta.env.VITE_API_URL}/product?search=${encodeURIComponent(query)}&limit=100`,
+          { credentials: 'include' }
+        );
+        if (!response.ok) throw new Error('Search failed');
+        const data = await response.json();
+        if (!cancelled && data.success) {
+          setSearchResults(Array.isArray(data.products) ? data.products : []);
+        }
+      } catch (err) {
+        if (!cancelled) setSearchResults([]);
+      } finally {
+        if (!cancelled) setSearchLoading(false);
+      }
+    };
+    doSearch();
+    return () => { cancelled = true; };
+  }, [query]);
+
+  // Fetch products with pagination (used when NOT searching)
   const fetchProducts = useCallback(async (page: number) => {
     try {
       if (page === 1) {
@@ -65,9 +96,7 @@ const Shop: React.FC = () => {
 
       const response = await fetch(
         `${import.meta.env.VITE_API_URL}/product?page=${page}&limit=20`,
-        {
-          credentials: 'include',
-        }
+        { credentials: 'include' }
       );
 
       if (!response.ok) throw new Error('Failed to fetch products');
@@ -136,16 +165,17 @@ const Shop: React.FC = () => {
     };
   }, [pagination, currentPage, loadingMore, loading, fetchProducts]);
 
-  // Get unique categories from products
+  // When searching use search results, otherwise use paginated products
+  const displayProducts = searchResults !== null ? searchResults : products;
+
+  // Get unique categories from displayed products
   const categories = useMemo(() => {
     const cats = new Set<string>();
-    products.forEach(p => {
-      if (p.category) {
-        cats.add(p.category);
-      }
+    displayProducts.forEach(p => {
+      if (p.category) cats.add(p.category);
     });
     return Array.from(cats).sort();
-  }, [products]);
+  }, [displayProducts]);
 
   // Toggle category selection
   const handleCategoryToggle = (category: string) => {
@@ -162,32 +192,14 @@ const Shop: React.FC = () => {
     setMinRating(0);
   };
 
-  // Filter products based on search query, categories, and rating
-  const filtered = products.filter(p => {
-    // Search query filter
-    if (query) {
-      const name = (p.name || '').toLowerCase();
-      const desc = (p.description || '').toLowerCase();
-      const cat = (p.category || '').toLowerCase();
-      const matchesQuery = name.includes(query) || desc.includes(query) || cat.includes(query);
-      if (!matchesQuery) return false;
-    }
-
-    // Category filter
+  // Filter by category and rating — search is handled by backend
+  const filtered = displayProducts.filter((p: Product) => {
     if (selectedCategories.length > 0) {
-      if (!p.category || !selectedCategories.includes(p.category)) {
-        return false;
-      }
+      if (!p.category || !selectedCategories.includes(p.category)) return false;
     }
-
-    // Rating filter
     if (minRating > 0) {
-      const rating = p.rating || 0;
-      if (rating < minRating) {
-        return false;
-      }
+      if ((p.rating || 0) < minRating) return false;
     }
-
     return true;
   });
 
@@ -271,7 +283,7 @@ const Shop: React.FC = () => {
   return (
     <div className="max-w-7xl mx-auto px-3 sm:px-6 py-4 sm:py-8">
       <h1 className="text-xl sm:text-2xl font-bold mb-1 sm:mb-2">Shop All Products</h1>
-      <p className="text-gray-600 mb-4 sm:mb-6 text-sm sm:text-base">Browse our complete collection of {products.length} products</p>
+      <p className="text-gray-600 mb-4 sm:mb-6 text-sm sm:text-base">Browse our complete collection of {displayProducts.length} products</p>
 
       {/* Mobile: Filter toggle bar */}
       <div className="flex md:hidden items-center justify-between mb-4 gap-3">
@@ -331,8 +343,10 @@ const Shop: React.FC = () => {
 
         {/* Main Content Area */}
         <div className="flex-1 min-w-0">
-          {loading ? (
-            <div className="py-12 text-center text-gray-600">Loading products...</div>
+          {(loading || searchLoading) ? (
+            <div className="py-12 text-center text-gray-600">
+              {searchLoading ? 'Searching products...' : 'Loading products...'}
+            </div>
           ) : error ? (
             <div className="py-12 text-center text-red-600">{error}</div>
           ) : filtered.length === 0 ? (
@@ -352,7 +366,7 @@ const Shop: React.FC = () => {
           ) : (
             <div>
               <div className="hidden md:block mb-4 text-sm text-gray-600">
-                Showing {filtered.length} of {products.length} products
+                Showing {filtered.length} of {displayProducts.length} products
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-3 sm:gap-6">
                 {filtered.map((p) => {
@@ -429,19 +443,23 @@ const Shop: React.FC = () => {
                 })}
               </div>
 
-              <div ref={observerTarget} className="w-full py-8 flex justify-center mt-6">
-                {loadingMore && (
-                  <div className="flex items-center gap-2">
-                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-teal-500"></div>
-                    <span className="text-gray-600">Loading more products...</span>
+              {searchResults === null && (
+                <>
+                  <div ref={observerTarget} className="w-full py-8 flex justify-center mt-6">
+                    {loadingMore && (
+                      <div className="flex items-center gap-2">
+                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-teal-500"></div>
+                        <span className="text-gray-600">Loading more products...</span>
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
 
-              {pagination && !pagination.hasNextPage && products.length > 0 && (
-                <div className="w-full text-center py-8 text-gray-500">
-                  You've reached the end of the products list
-                </div>
+                  {pagination && !pagination.hasNextPage && products.length > 0 && (
+                    <div className="w-full text-center py-8 text-gray-500">
+                      You've reached the end of the products list
+                    </div>
+                  )}
+                </>
               )}
             </div>
           )}

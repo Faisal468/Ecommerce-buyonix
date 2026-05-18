@@ -14,35 +14,38 @@ const cfRecommender = new CFRecommender();
 // Initialize Visual Search helper
 const visualSearchHelper = new VisualSearchHelper();
 
-// Get all products (for frontend home page) with pagination
+// Get all products (for frontend home page) with pagination and optional search
 router.get("/", async (req, res) => {
     try {
-        // Get page and limit from query parameters, with defaults
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 10;
+        const search = (req.query.search || '').trim();
 
-        // Validate parameters
-        if (page < 1 || limit < 1 || limit > 100) {
+        if (page < 1 || limit < 1 || limit > 200) {
             return res.status(400).json({
                 success: false,
                 message: "Invalid page or limit parameters"
             });
         }
 
-        // Calculate skip value
+        // Build filter — add text search when query is provided
+        const filter = { status: 'active' };
+        if (search) {
+            filter.$or = [
+                { name: { $regex: search, $options: 'i' } },
+                { description: { $regex: search, $options: 'i' } },
+                { category: { $regex: search, $options: 'i' } }
+            ];
+        }
+
         const skip = (page - 1) * limit;
-
-        // Get total count of active products
-        const totalProducts = await Product.countDocuments({ status: 'active' });
-
-        // Fetch products with pagination
-        const products = await Product.find({ status: 'active' })
+        const totalProducts = await Product.countDocuments(filter);
+        const products = await Product.find(filter)
             .populate('sellerId', 'storeName businessName')
             .sort({ createdAt: -1 })
             .skip(skip)
             .limit(limit);
 
-        // Calculate total pages
         const totalPages = Math.ceil(totalProducts / limit);
 
         res.status(200).json({
