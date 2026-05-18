@@ -320,7 +320,7 @@ const Shop: React.FC = () => {
                         </div>
                       )}
                       <Link to={`/product/${p._id}`} onClick={() => trackProductView(p._id)} className="block">
-                        <div className="relative h-48 bg-gray-100 flex items-center justify-center overflow-hidden">
+                        <div className="relative h-28 sm:h-48 bg-gray-100 flex items-center justify-center overflow-hidden">
                           <img
                             src={imageUrl}
                             alt={p.name}
@@ -328,33 +328,33 @@ const Shop: React.FC = () => {
                           />
                         </div>
                       </Link>
-                      <div className="p-4">
+                      <div className="p-2 sm:p-4">
                         {p.category && (
-                          <div className="text-xs text-gray-500 mb-1 capitalize">{p.category}</div>
+                          <div className="text-xs text-gray-500 mb-0.5 capitalize">{p.category}</div>
                         )}
                         <Link
                           to={`/product/${p._id}`}
                           onClick={() => trackProductView(p._id)}
                           className="block hover:text-teal-600 transition-colors"
                         >
-                          <h3 className="font-semibold text-gray-800 mb-2 line-clamp-2">{p.name}</h3>
+                          <h3 className="font-semibold text-gray-800 text-xs sm:text-sm mb-1 sm:mb-2 line-clamp-2">{p.name}</h3>
                         </Link>
                         {/* Rating - always show stars */}
-                        <div className="flex items-center mb-2">
-                          <div className="flex text-yellow-400 text-sm">
+                        <div className="flex items-center mb-1 sm:mb-2">
+                          <div className="flex text-yellow-400 text-xs">
                             {[...Array(5)].map((_, i) => (
                               <span key={i}>{i < Math.floor(p.rating || 0) ? '★' : '☆'}</span>
                             ))}
                           </div>
-                          <span className="text-sm text-gray-600 ml-1">
+                          <span className="text-xs text-gray-600 ml-1">
                             {(p.rating || 0).toFixed(1)} ({p.reviewCount || 0})
                           </span>
                         </div>
-                        <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center justify-between mb-1.5 sm:mb-3">
                           <div>
-                            <span className="text-lg font-bold text-gray-900">${p.price?.toFixed(2) || 'N/A'}</span>
+                            <span className="text-sm sm:text-lg font-bold text-gray-900">${p.price?.toFixed(2) || 'N/A'}</span>
                             {p.originalPrice && p.originalPrice > (p.price || 0) && (
-                              <span className="ml-2 text-sm text-gray-500 line-through">
+                              <span className="ml-1 text-xs text-gray-400 line-through">
                                 ${p.originalPrice.toFixed(2)}
                               </span>
                             )}
@@ -376,7 +376,7 @@ const Shop: React.FC = () => {
                               });
                             }
                           }}
-                          className="w-full bg-teal-600 text-white py-2 rounded-md font-medium hover:bg-teal-700 transition-colors"
+                          className="w-full bg-teal-600 text-white py-1.5 sm:py-2 rounded-md font-medium text-xs sm:text-sm hover:bg-teal-700 transition-colors"
                         >
                           Add to cart
                         </button>

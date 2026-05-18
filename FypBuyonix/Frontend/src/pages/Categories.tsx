@@ -177,7 +177,7 @@ const Categories: React.FC = () => {
 
     return (
       <div className="flex-shrink-0 w-64 bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow relative">
-        <div className="relative h-48 bg-gray-100 flex items-center justify-center overflow-hidden">
+        <div className="relative h-28 sm:h-48 bg-gray-100 flex items-center justify-center overflow-hidden">
           {discountPercent && (
             <div className="absolute top-2 right-2 bg-orange-500 text-white text-xs font-bold px-2 py-1 rounded z-10">
               Sale
@@ -189,28 +189,28 @@ const Categories: React.FC = () => {
             className="w-full h-full object-cover"
           />
         </div>
-        <div className="p-4">
+        <div className="p-2 sm:p-4">
           {product.category && (
-            <div className="text-xs text-gray-500 mb-1 capitalize">{product.category}</div>
+            <div className="text-xs text-gray-500 mb-0.5 capitalize">{product.category}</div>
           )}
           <Link to={`/product/${product._id}`} className="block hover:text-teal-600 transition-colors">
-            <h3 className="font-semibold text-gray-800 mb-2 line-clamp-2 min-h-[3rem]">{product.name}</h3>
+            <h3 className="font-semibold text-gray-800 text-xs sm:text-sm mb-1 sm:mb-2 line-clamp-2">{product.name}</h3>
           </Link>
-          <div className="flex items-center mb-2">
-            <span className="text-yellow-400">
+          <div className="flex items-center mb-1 sm:mb-2">
+            <span className="text-yellow-400 text-xs">
               {[...Array(5)].map((_, i) => (
                 <span key={i}>{i < Math.floor(product.rating || 0) ? '★' : '☆'}</span>
               ))}
             </span>
-            <span className="text-sm text-gray-600 ml-1">
+            <span className="text-xs text-gray-600 ml-1">
               ({product.reviewCount || 0})
             </span>
           </div>
-          <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center justify-between mb-1.5 sm:mb-3">
             <div>
-              <span className="text-lg font-bold text-gray-900">${product.price?.toFixed(2) || 'N/A'}</span>
+              <span className="text-sm sm:text-lg font-bold text-gray-900">${product.price?.toFixed(2) || 'N/A'}</span>
               {product.originalPrice && product.originalPrice > (product.price || 0) && (
-                <span className="ml-2 text-sm text-gray-500 line-through">
+                <span className="ml-1 text-xs text-gray-400 line-through">
                   ${product.originalPrice.toFixed(2)}
                 </span>
               )}
@@ -218,7 +218,7 @@ const Categories: React.FC = () => {
           </div>
           <button
             onClick={handleAddToCart}
-            className="w-full bg-teal-600 text-white py-2 rounded-md font-medium hover:bg-teal-700 transition-colors flex items-center justify-center gap-2"
+            className="w-full bg-teal-600 text-white py-1.5 sm:py-2 rounded-md font-medium text-xs sm:text-sm hover:bg-teal-700 transition-colors flex items-center justify-center gap-1 sm:gap-2"
           >
             <span>🛒</span>
             Add to Cart

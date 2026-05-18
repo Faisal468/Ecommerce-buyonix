@@ -138,31 +138,31 @@ const Home = () => {
             {discountPercent}
           </div>
         )}
-        <div className="h-48 bg-gray-100 flex items-center justify-center overflow-hidden">
+        <div className="h-28 sm:h-48 bg-gray-100 flex items-center justify-center overflow-hidden">
           <img
             src={imageUrl}
             alt={product.name}
             className="w-full h-full object-cover hover:scale-105 transition-transform"
           />
         </div>
-        <div className="p-4 flex flex-col flex-grow">
-          <h3 className="font-semibold text-gray-800 mb-2 line-clamp-2 hover:text-teal-600 transition-colors min-h-[48px]">
+        <div className="p-2 sm:p-4 flex flex-col flex-grow">
+          <h3 className="font-semibold text-gray-800 text-xs sm:text-sm mb-1 sm:mb-2 line-clamp-2 hover:text-teal-600 transition-colors">
             {product.name}
           </h3>
-          <div className="flex items-center mb-2">
-            <span className="text-yellow-400">★</span>
-            <span className="text-sm text-gray-600 ml-1">
-              {product.rating?.toFixed(1) || '0.0'} ({product.reviewCount || 0} reviews)
+          <div className="flex items-center mb-1 sm:mb-2">
+            <span className="text-yellow-400 text-xs">★</span>
+            <span className="text-xs text-gray-600 ml-1">
+              {product.rating?.toFixed(1) || '0.0'} ({product.reviewCount || 0})
             </span>
           </div>
-          <p className="text-xs text-gray-500 mb-2 min-h-[16px]">
+          <p className="text-xs text-gray-500 mb-1 sm:mb-2 truncate">
             {product.sellerId?.storeName ? `by ${product.sellerId.storeName}` : '\u00A0'}
           </p>
-          <div className="flex items-center justify-between mb-3 mt-auto">
+          <div className="flex items-center justify-between mb-1.5 sm:mb-3 mt-auto">
             <div>
-              <span className="text-lg font-bold text-gray-900">${product.price.toFixed(2)}</span>
+              <span className="text-sm sm:text-lg font-bold text-gray-900">${product.price.toFixed(2)}</span>
               {product.originalPrice > product.price && (
-                <span className="ml-2 text-sm text-gray-500 line-through">
+                <span className="ml-1 text-xs text-gray-400 line-through">
                   ${product.originalPrice.toFixed(2)}
                 </span>
               )}
@@ -170,7 +170,7 @@ const Home = () => {
           </div>
           <button
             onClick={handleAddToCart}
-            className="w-full bg-teal-600 text-white py-2 rounded-md font-medium hover:bg-teal-700 transition-colors"
+            className="w-full bg-teal-600 text-white py-1.5 sm:py-2 rounded-md font-medium text-xs sm:text-sm hover:bg-teal-700 transition-colors"
           >
             Add to cart
           </button>
