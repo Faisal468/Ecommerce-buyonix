@@ -540,7 +540,7 @@ const Checkout: React.FC = () => {
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <div className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center gap-4">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center gap-4">
           <button
             onClick={() => navigate('/')}
             className="flex items-center gap-2 text-teal-600 hover:text-teal-700 font-medium"
@@ -551,15 +551,15 @@ const Checkout: React.FC = () => {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 py-8">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 py-4 sm:py-8">
         {/* Main Product Section */}
         {mainProduct && (
-          <div className="bg-white rounded-lg shadow-lg p-8 mb-8">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="bg-white rounded-lg shadow-lg p-4 sm:p-8 mb-6 sm:mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-8">
               {/* Left: Product Images */}
               <div>
                 {/* Main Image */}
-                <div className="bg-gray-200 rounded-lg overflow-hidden mb-4 flex items-center justify-center h-96">
+                <div className="bg-gray-200 rounded-lg overflow-hidden mb-4 flex items-center justify-center h-56 sm:h-96">
                   {/* Show color variant image if selected, otherwise show normal product image */}
                   {selectedColor !== null && mainProduct.colorVariants && mainProduct.colorVariants[selectedColor] ? (
                     <img
@@ -611,7 +611,7 @@ const Checkout: React.FC = () => {
                   </div>
 
                   {/* Product Name & Rating */}
-                  <h1 className="text-3xl font-bold text-gray-900 mb-3">{mainProduct.name}</h1>
+                  <h1 className="text-xl sm:text-3xl font-bold text-gray-900 mb-3">{mainProduct.name}</h1>
 
                   <div className="flex items-center gap-2 mb-3">
                     <div className="flex text-yellow-400 text-lg">
@@ -878,7 +878,7 @@ const Checkout: React.FC = () => {
               <h2 className="text-2xl font-bold text-gray-900"> Product Recommendations</h2>
               <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">Based on your history</span>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
               {relatedProducts.map((product: Product) => {
                 const imageUrl = product.images?.[0] || 'https://via.placeholder.com/250';
 
@@ -994,10 +994,10 @@ const Checkout: React.FC = () => {
       {isBargainOpen && mainProduct && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4 py-10">
           <div className="w-full max-w-4xl bg-white rounded-3xl shadow-2xl overflow-hidden">
-            <div className="flex items-center justify-between px-8 py-6 border-b bg-gradient-to-r from-white to-emerald-50">
+            <div className="flex items-center justify-between px-4 sm:px-8 py-4 sm:py-6 border-b bg-gradient-to-r from-white to-emerald-50">
               <div>
-                <p className="text-sm uppercase tracking-widest text-gray-400 font-semibold">Bargain with AI</p>
-                <h3 className="text-2xl font-bold text-gray-900">Let's Make a Deal - Smart Pricing Just for You!</h3>
+                <p className="text-xs sm:text-sm uppercase tracking-widest text-gray-400 font-semibold">Bargain with AI</p>
+                <h3 className="text-base sm:text-2xl font-bold text-gray-900">Let's Make a Deal — Smart Pricing Just for You!</h3>
               </div>
               <button
                 onClick={closeBargainModal}
@@ -1008,8 +1008,8 @@ const Checkout: React.FC = () => {
               </button>
             </div>
 
-            <div className="px-8 py-8 space-y-6 bg-gray-50">
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-white border border-gray-100 rounded-2xl p-6 shadow-sm">
+            <div className="px-4 sm:px-8 py-4 sm:py-8 space-y-4 sm:space-y-6 bg-gray-50">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 sm:gap-6 bg-white border border-gray-100 rounded-2xl p-4 sm:p-6 shadow-sm">
                 <div className="flex items-center gap-4">
                   <div className="w-20 h-20 rounded-2xl overflow-hidden bg-gray-100">
                     {mainProduct.images && mainProduct.images.length > 0 ? (
@@ -1026,9 +1026,9 @@ const Checkout: React.FC = () => {
                   </div>
                   <div>
                     <p className="text-xs uppercase tracking-wide text-gray-400 mb-1">Product ID: {mainProduct._id}</p>
-                    <h4 className="text-xl font-semibold text-gray-900">{mainProduct.name}</h4>
+                    <h4 className="text-base sm:text-xl font-semibold text-gray-900 line-clamp-2">{mainProduct.name}</h4>
                     <p className="text-sm text-gray-500">Original Price</p>
-                    <p className="text-2xl font-bold text-teal-600">$ {mainProduct.price.toFixed(0)}</p>
+                    <p className="text-xl sm:text-2xl font-bold text-teal-600">$ {mainProduct.price.toFixed(0)}</p>
                   </div>
                 </div>
 
@@ -1054,8 +1054,8 @@ const Checkout: React.FC = () => {
                 </div>
               </div>
 
-              <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-                <div className="h-64 overflow-y-auto space-y-4">
+              <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 sm:p-6">
+                <div className="h-48 sm:h-64 overflow-y-auto space-y-4">
                   {bargainMessages.map((msg, idx) => (
                     <div key={idx} className={`flex ${msg.sender === 'ai' ? 'justify-start' : 'justify-end'}`}>
                       <div

@@ -307,7 +307,7 @@ const Shop: React.FC = () => {
               <div className="mb-4 text-sm text-gray-600">
                 Showing {filtered.length} of {products.length} products
               </div>
-              <div className="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-3 gap-2 sm:gap-6">
+              <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-3 sm:gap-6">
                 {filtered.map((p) => {
                   const imageUrl = p.images && p.images.length > 0 ? (typeof p.images[0] === 'string' ? p.images[0] : p.images[0].url) : 'https://via.placeholder.com/300';
                   const discountPercent = p.discount && p.discount > 0 ? `-${p.discount}%` : null;

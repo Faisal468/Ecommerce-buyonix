@@ -848,7 +848,7 @@ const ProductDetail = () => {
             {relatedProducts.length > 0 && (
                 <div className="max-w-7xl mx-auto px-6 py-10 border-t border-gray-200">
                     <h2 className="text-2xl font-bold text-gray-900 mb-6">You May Also Like</h2>
-                    <div className="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-6">
+                    <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">
                         {relatedProducts.map((item) => (
                             <div
                                 key={item._id}
