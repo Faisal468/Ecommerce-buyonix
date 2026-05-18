@@ -176,7 +176,7 @@ const Categories: React.FC = () => {
     };
 
     return (
-      <div className="flex-shrink-0 w-64 bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow relative">
+      <div className="w-full bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow relative">
         <div className="relative h-28 sm:h-48 bg-gray-100 flex items-center justify-center overflow-hidden">
           {discountPercent && (
             <div className="absolute top-2 right-2 bg-orange-500 text-white text-xs font-bold px-2 py-1 rounded z-10">
