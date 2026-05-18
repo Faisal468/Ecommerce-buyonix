@@ -385,13 +385,13 @@ const BuyNow: React.FC = () => {
                       className="hidden"
                     />
                     <div
-                      className={`p-3 border-2 rounded-lg text-center transition-all ${formData.paymentMethod === method.id
+                      className={`p-2 sm:p-3 border-2 rounded-lg text-center transition-all ${formData.paymentMethod === method.id
                         ? 'border-teal-600 bg-teal-50'
                         : 'border-gray-300 hover:border-teal-300'
                         }`}
                     >
-                      <span className="text-2xl">{method.icon}</span>
-                      <p className="text-xs font-medium text-gray-700 mt-1">{method.label}</p>
+                      <span className="text-lg sm:text-2xl">{method.icon}</span>
+                      <p className="text-[10px] sm:text-xs font-medium text-gray-700 mt-0.5 leading-tight">{method.label}</p>
                     </div>
                   </label>
                 ))}
