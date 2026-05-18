@@ -36,6 +36,7 @@ import MyOrders from './pages/MyOrders';
 import Settings from './pages/Settings';
 import Footer from './components/Footer';
 import AdminApp from './admin/AdminApp';
+import AuthCallback from './pages/AuthCallback';
 
 
 
@@ -89,6 +90,7 @@ function App() {
             <Route path="/seller-chats" element={<SellerChats />} />
             <Route path="/seller-support" element={<SellerSupport />} />
 
+            <Route path="/auth/callback" element={<AuthCallback />} />
             <Route path="/admin" element={<AdminApp />} />
           </Routes>
         </div>

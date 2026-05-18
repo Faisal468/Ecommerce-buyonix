@@ -13,10 +13,17 @@ router.get("/google", passport.authenticate("google", {
 
 router.get(
     "/google/callback",
-    passport.authenticate("google", {
-        successRedirect: process.env.FRONTEND_URL,
-        failureRedirect: "/auth/login/failed",
-    })
+    passport.authenticate("google", { failureRedirect: "/auth/login/failed" }),
+    (req, res) => {
+        const user = req.user;
+        const params = new URLSearchParams({
+            id: user._id.toString(),
+            name: user.displayName || '',
+            email: user.email || ''
+        });
+        const frontendUrl = (process.env.FRONTEND_URL || '').replace(/\/$/, '');
+        res.redirect(`${frontendUrl}/auth/callback?${params.toString()}`);
+    }
 );
 
 // Check if user is authenticated (using session)
